@@ -8,148 +8,305 @@
 
 # Import's
 
-import re
+import time
+import os
+import json
+from pessoa_class import ( Pessoa )
+from dados import pessoas
 
-class Pessoa:
-    
-    # Construtor para criar uma pessoa
-    def __init__(self, nome, idade, d_nascimento, cpf, endereco):
-        self.nome = nome
-        self.idade = idade
-        self.d_nascimento = d_nascimento
-        self.cpf = cpf
-        self.endereco = endereco
+from adm import (
+    salvar_usuarios_em_arquivo,
+    carregar_usuarios_do_arquivo,
+    exibir_todos_usuarios_arquivo,
+    usuario,
+    senha
+)
+from coleta_dados import (
+    coletar_nome,
+    coletar_idade,
+    coletar_data_nascimento,
+    coletar_cpf,
+    coletar_endereco,
+    validar_cpf
+)
 
-    # Exibe os dados da pessoa
-    def exibir_dados(self):
-        print(f"Nome: {self.nome}")
-        print(f"Idade: {self.idade}")
-        print(f"Data de Nascimento: {self.d_nascimento}")
-        print(f"CPF: {self.cpf}")
-        print(f"Endereço: {self.endereco}")
-        print("-" * 30)
+ARQUIVO_USUARIOS = "usuarios.json"
 
-    # Atualiza o dado de um atributo específico com um menu de opções
-    def atualizar_dado(self):
-        while True:
-            print("Escolha o atributo que deseja atualizar:")
-            print("1 >>> Nome")
-            print("2 >>> Idade")
-            print("3 >>> Data de Nascimento")
-            print("4 >>> CPF")
-            print("5 >>> Endereço")
-            print("6 >>> Voltar ao menu principal")
-            opcao = input("Digite o número da opção desejada: ")
-
-            if opcao == "1":
-                self.nome = coletar_nome()
-                print("Nome atualizado com sucesso!")
-            elif opcao == "2":
-                self.idade = coletar_idade()
-                print("Idade atualizada com sucesso!")
-            elif opcao == "3":
-                self.d_nascimento = coletar_data_nascimento()
-                print("Data de nascimento atualizada com sucesso!")
-            elif opcao == "4":
-                self.cpf = coletar_cpf()
-                print("CPF atualizado com sucesso!")
-            elif opcao == "5":
-                self.endereco = coletar_endereco()
-                print("Endereço atualizado com sucesso!")
-            elif opcao == "6":
-                print("Voltando ao menu principal.")
-                break
-            else:
-                print("Opção inválida. Tente novamente.")
-
-# Lista para armazenar objetos do tipo Pessoa
-pessoas = []
-
-# Função para coletar o nome
-def coletar_nome():
-    while True:
-        nome = input("Nome: ")
-        if nome.replace(" ", "").isalpha():
-            return nome
-        else:
-            print("Nome inválido, tente novamente. Somente letras são permitidas.")
-
-# Função para coletar idade
-def coletar_idade():
-    while True:
-        idade = input("Idade: ")
-        if idade.isdigit():
-            return int(idade)
-        else:
-            print("A idade deve conter apenas números.")
-
-# Função para coletar data de nascimento
-def coletar_data_nascimento():
-    while True:
-        d_nascimento = input("Digite a data de nascimento no formato ##/##/####: ")
-        if re.fullmatch(r'\d{2}/\d{2}/\d{4}', d_nascimento):
-            print("Data Válida")
-            return d_nascimento
-        else:
-            print("Formato de data inválido! Atenção ao formato exigido e tente novamente.")
-
-# Função para coletar CPF
-def coletar_cpf():     
-    while True:
-        cpf = input("Digite o CPF no formato ###.###.###-##: ")
-        if re.fullmatch(r'\d{3}\.\d{3}\.\d{3}-\d{2}', cpf):
-            print("CPF válido.")
-            return cpf
-        else:
-            print("Formato inválido! Tente novamente.")
-
-# Função para coletar endereço
-def coletar_endereco():
-    return input("Digite o endereço em que você reside: ")
+# Limpa a tela no Windows (comando 'cls') e no Linux/macOS (comando 'clear')
+def limpar_tela():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 # Função para criar um novo usuário e adicioná-lo à lista
 def novo_usuario():
     nome = coletar_nome()
     idade = coletar_idade()
     data = coletar_data_nascimento()
-    cpf = coletar_cpf()
+    
+    while True:
+        cpf = coletar_cpf()
+        if validar_cpf(cpf):  # Verifica se o CPF é válido
+            break  # Sai do loop se o CPF for válido
+        else:
+            print("CPF inválido! Tente novamente.")  # Aviso para CPF inválido
+    
     endereco = coletar_endereco()
     nova_pessoa = Pessoa(nome, idade, data, cpf, endereco)
     pessoas.append(nova_pessoa)
+    salvar_usuarios_em_arquivo(pessoas)
     print("Novo usuário adicionado com sucesso!")
+    input("\nPressione Enter para continuar...")  # Pausa após adicionar o usuário
+
+# Função para exibir dados de uma pessoa com esclha de como buscar
+def exibir_dados_usuario():
+    limpar_tela()  # Limpa a tela ao mostrar o menu
+    print("Escolha um método de busca:")
+    print("1 >>> Nome")
+    print("2 >>> Idade")
+    print("3 >>> Data de nascimento")
+    print("4 >>> CPF")
+    print("5 >>> Voltar ao menu principal")
+
+    metodo = input("Escolha uma opção: ")
+    if metodo == "1":
+        buscar_usuario_por_nome()
+
+    elif metodo == "2":
+        exibir_dados_usuario_idade()
+
+    elif metodo == "3":
+        exibir_dados_usuario_d_nascimento()
+
+    elif metodo == "4":
+        exibir_dados_usuario_cpf()
+
+    elif metodo == "5":
+        print("Voltando ao menu principal...")
+    else:
+        print("Opção inválida. Tente novamente.")
+        input("\nPressione Enter para continuar...")  # Pausa se a opção for inválida
+
+# Função para exibir dados de uma pessoa com base no nome
+def buscar_usuario_por_nome():
+    nome_busca = input("Nome: ")
+    # Verifica se o arquivo de usuários existe
+    if not os.path.exists(ARQUIVO_USUARIOS):
+        print("Nenhum usuário cadastrado.")
+        return
+    
+    # Carrega os dados do arquivo
+    with open(ARQUIVO_USUARIOS, "r") as arquivo:
+        lista_pessoas = json.load(arquivo)
+        
+        # Busca o usuário pelo nome
+        for dados in lista_pessoas:
+            if dados['nome'].lower() == nome_busca.lower():  # Ignora diferenças de maiúsculas/minúsculas
+                print("Usuário encontrado!")
+                print(f"Nome: {dados['nome']}")
+                print(f"Idade: {dados['idade']}")
+                print(f"Data de Nascimento: {dados['d_nascimento']}")
+                print(f"CPF: {dados['cpf']}")
+                print(f"Endereço: {dados['endereco']}")
+                print("-" * 30)
+                input("\nPressione Enter para continuar...")
+                return
+
+        # Se nenhum usuário for encontrado
+        print("Usuário não encontrado.")
+        input("\nPressione Enter para continuar...")
+
+# Função para exibir dados de uma pessoa com base na idade
+def exibir_dados_usuario_idade():
+    idade_busca = input("Idade: ")
+    # Verifica se o arquivo de usuários existe
+    if not os.path.exists(ARQUIVO_USUARIOS):
+        print("Nenhum usuário cadastrado.")
+        return
+    
+    # Carrega os dados do arquivo
+    with open(ARQUIVO_USUARIOS, "r") as arquivo:
+        lista_pessoas = json.load(arquivo)
+        
+        # Busca o usuário pelo nome
+        for dados in lista_pessoas:
+            if dados['idade'] == idade_busca:
+                print("Usuário encontrado!")
+                print(f"Nome: {dados['nome']}")
+                print(f"Idade: {dados['idade']}")
+                print(f"Data de Nascimento: {dados['d_nascimento']}")
+                print(f"CPF: {dados['cpf']}")
+                print(f"Endereço: {dados['endereco']}")
+                print("-" * 30)
+                input("\nPressione Enter para continuar...")
+                return
+
+        # Se nenhum usuário for encontrado
+        print("Usuário não encontrado.")
+        input("\nPressione Enter para continuar...")
+
+# Função para exibir dados de uma pessoa com base na data de nascimento
+def exibir_dados_usuario_d_nascimento():
+    data_busca = input("Data: ")
+    # Verifica se o arquivo de usuários existe
+    if not os.path.exists(ARQUIVO_USUARIOS):
+        print("Nenhum usuário cadastrado.")
+        return
+    
+    # Carrega os dados do arquivo
+    with open(ARQUIVO_USUARIOS, "r") as arquivo:
+        lista_pessoas = json.load(arquivo)
+        
+        # Busca o usuário pelo nome
+        for dados in lista_pessoas:
+            if dados['d_nascimento'] == data_busca:
+                print("Usuário encontrado!")
+                print(f"Nome: {dados['nome']}")
+                print(f"Idade: {dados['idade']}")
+                print(f"Data de Nascimento: {dados['d_nascimento']}")
+                print(f"CPF: {dados['cpf']}")
+                print(f"Endereço: {dados['endereco']}")
+                print("-" * 30)
+                input("\nPressione Enter para continuar...")
+                return
+
+        # Se nenhum usuário for encontrado
+        print("Usuário não encontrado.")
+        input("\nPressione Enter para continuar...")
 
 # Função para exibir dados de uma pessoa com base no CPF
-def exibir_dados_usuario():
-    cpf = input("Digite o CPF do usuário para exibir os dados: ")
-    for pessoa in pessoas:
-        if pessoa.cpf == cpf:
-            pessoa.exibir_dados()
-            return
-    print("Usuário não encontrado.")
+def exibir_dados_usuario_cpf():
+    cpf_busca = input("CPF: ")
+    # Verifica se o arquivo de usuários existe
+    if not os.path.exists(ARQUIVO_USUARIOS):
+        print("Nenhum usuário cadastrado.")
+        return
+    
+    # Carrega os dados do arquivo
+    with open(ARQUIVO_USUARIOS, "r") as arquivo:
+        lista_pessoas = json.load(arquivo)
+        
+        # Busca o usuário pelo CPF
+        for dados in lista_pessoas:
+            if dados['cpf'] == cpf_busca:
+                print("Usuário encontrado!")
+                print(f"Nome: {dados['nome']}")
+                print(f"Idade: {dados['idade']}")
+                print(f"Data de Nascimento: {dados['d_nascimento']}")
+                print(f"CPF: {dados['cpf']}")
+                print(f"Endereço: {dados['endereco']}")
+                print("-" * 30)
+                input("\nPressione Enter para continuar...")
+                return
 
-# Função para atualizar dados de uma pessoa com base no CPF
-def atualizar_dados_usuario():
-    cpf = input("Digite o CPF do usuário para atualizar os dados: ")
-    for pessoa in pessoas:
-        if pessoa.cpf == cpf:
-            pessoa.atualizar_dado()
+        # Se nenhum usuário for encontrado
+        print("Usuário não encontrado.")
+        input("\nPressione Enter para continuar...")
+
+
+# Função para atualizar dados de um úsuario com base no CPF
+def atualizar_usuario():
+    print("Insira as credenciais de administrador:")
+    login_usuario = input("Usuario: ")
+    login_senha = input("Senha: ")
+    print("-"*30)
+    while True:
+        if login_usuario == usuario and login_senha == senha:
+            print("login efetuado com sucesso")
+            time.sleep(3)
+            break
+        else:
+            print("Usuário ou senha incorretos\n")
+            print("Retornando ao menu principal...")
+            time.sleep(3)
+            break
+    if not os.path.exists(ARQUIVO_USUARIOS):
+        print("Nenhum usuário cadastrado.")
+        return
+
+    # Carrega os dados do arquivo
+    with open(ARQUIVO_USUARIOS, "r") as arquivo:
+        lista_pessoas = json.load(arquivo)
+
+    cpf_busca = input("Digite o CPF do usuário para atualizar os dados: ")
+
+    # Busca o usuário pelo CPF
+    for pessoa in lista_pessoas:
+        if pessoa["cpf"] == cpf_busca:
+            print("Usuário encontrado!")
+            print(f"Nome: {pessoa['nome']}")
+            print(f"Idade: {pessoa['idade']}")
+            print(f"Data de Nascimento: {pessoa['d_nascimento']}")
+            print(f"CPF: {pessoa['cpf']}")
+            print(f"Endereço: {pessoa['endereco']}")
+            print("-" * 30)
+
+            # Menu de atualização
+            print("\nEscolha o dado que deseja atualizar:")
+            print("1 >>> Nome")
+            print("2 >>> Idade")
+            print("3 >>> Data de Nascimento")
+            print("4 >>> CPF")
+            print("5 >>> Endereço")
+            print("6 >>> Cancelar")
+            opcao = input("Digite o número da opção desejada: ")
+
+            if opcao == "1":
+                pessoa["nome"] = coletar_nome()
+                print("Nome atualizado com sucesso!")
+            elif opcao == "2":
+                pessoa["idade"] = coletar_idade()
+                print("Idade atualizada com sucesso!")
+            elif opcao == "3":
+                pessoa["d_nascimento"] = coletar_data_nascimento()
+                print("Data de nascimento atualizada com sucesso!")
+            elif opcao == "4":
+                while True:
+                    novo_cpf = coletar_cpf()
+                    if validar_cpf(novo_cpf):
+                        pessoa["cpf"] = novo_cpf
+                        print("CPF atualizado com sucesso!")
+                        break
+                    else:
+                        print("CPF inválido! Tente novamente.")
+            elif opcao == "5":
+                pessoa["endereco"] = coletar_endereco()
+                print("Endereço atualizado com sucesso!")
+            elif opcao == "6":
+                print("Atualização cancelada.")
+                return
+            else:
+                print("Opção inválida.")
+
+            # Salva as alterações no arquivo
+            with open(ARQUIVO_USUARIOS, "w") as arquivo:
+                json.dump(lista_pessoas, arquivo, indent=4)
+            print("Dados atualizados com sucesso!")
             return
     print("Usuário não encontrado.")
 
 # Função para exibir todos os usuários cadastrados
 def exibir_todos_usuarios():
-    if not pessoas:
-        print("Nenhum usuário cadastrado.")
-    else:
-        print("Lista de todos os usuários cadastrados:")
-        for pessoa in pessoas:
-            pessoa.exibir_dados()
+    print("Insira as credenciais de administrador:")
+    login_usuario = input("Usuario: ")
+    login_senha = input("Senha: ")
+    print("-"*30)
+    while True:
+        if login_usuario == usuario and login_senha == senha:
+            print("login efetuado com sucesso")
+            time.sleep(3)
+            break
+        else:
+            print("Usuário ou senha incorretos\n")
+            print("Retornando ao menu principal...")
+            time.sleep(3)
+            break
+    exibir_todos_usuarios_arquivo()
 
 # Função do menu principal
 def menu():
+    limpar_tela()  # Limpa a tela ao mostrar o menu
     print("Menu de opções:")
     print("1 >>> Novo Usuário")
-    print("2 >>> Exibir dados de um usuário")
+    print("2 >>> Buscar dados de um usuário")
     print("3 >>> Atualizar dados de um usuário")
     print("4 >>> Exibir todos os usuários")
     print("5 >>> Sair do programa")
@@ -157,6 +314,7 @@ def menu():
 
 # Loop principal do programa
 while True:
+    carregar_usuarios_do_arquivo()
     opcao = menu()
     
     if opcao == "1":
@@ -164,7 +322,7 @@ while True:
     elif opcao == "2":
         exibir_dados_usuario()
     elif opcao == "3":
-        atualizar_dados_usuario()
+        atualizar_usuario()
     elif opcao == "4":
         exibir_todos_usuarios()
     elif opcao == "5":
@@ -172,3 +330,4 @@ while True:
         break
     else:
         print("Opção inválida. Tente novamente.")
+        input("\nPressione Enter para continuar...")  # Pausa se a opção for inválida
