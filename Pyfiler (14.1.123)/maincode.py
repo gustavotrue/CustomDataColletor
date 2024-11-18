@@ -18,8 +18,8 @@ from adm import (
     salvar_usuarios_em_arquivo,
     carregar_usuarios_do_arquivo,
     exibir_todos_usuarios_arquivo,
-    usuario,
-    senha
+    login_adm,
+    deletar_usuario
 )
 from coleta_dados import (
     coletar_nome,
@@ -204,20 +204,7 @@ def exibir_dados_usuario_cpf():
 
 # Função para atualizar dados de um úsuario com base no CPF
 def atualizar_usuario():
-    print("Insira as credenciais de administrador:")
-    login_usuario = input("Usuario: ")
-    login_senha = input("Senha: ")
-    print("-"*30)
-    while True:
-        if login_usuario == usuario and login_senha == senha:
-            print("login efetuado com sucesso")
-            time.sleep(3)
-            break
-        else:
-            print("Usuário ou senha incorretos\n")
-            print("Retornando ao menu principal...")
-            time.sleep(3)
-            break
+    login_adm()
     if not os.path.exists(ARQUIVO_USUARIOS):
         print("Nenhum usuário cadastrado.")
         return
@@ -252,12 +239,15 @@ def atualizar_usuario():
             if opcao == "1":
                 pessoa["nome"] = coletar_nome()
                 print("Nome atualizado com sucesso!")
+                time.sleep(3)
             elif opcao == "2":
                 pessoa["idade"] = coletar_idade()
                 print("Idade atualizada com sucesso!")
+                time.sleep(3)
             elif opcao == "3":
-                pessoa["d_nascimento"] = coletar_data_nascimento()
-                print("Data de nascimento atualizada com sucesso!")
+                pessoa["d_nascimento"] = coletar_data
+                print("Data de nascimento atualizada")
+                time.sleep(3)
             elif opcao == "4":
                 while True:
                     novo_cpf = coletar_cpf()
@@ -285,20 +275,7 @@ def atualizar_usuario():
 
 # Função para exibir todos os usuários cadastrados
 def exibir_todos_usuarios():
-    print("Insira as credenciais de administrador:")
-    login_usuario = input("Usuario: ")
-    login_senha = input("Senha: ")
-    print("-"*30)
-    while True:
-        if login_usuario == usuario and login_senha == senha:
-            print("login efetuado com sucesso")
-            time.sleep(3)
-            break
-        else:
-            print("Usuário ou senha incorretos\n")
-            print("Retornando ao menu principal...")
-            time.sleep(3)
-            break
+    login_adm()
     exibir_todos_usuarios_arquivo()
 
 # Função do menu principal
@@ -309,7 +286,8 @@ def menu():
     print("2 >>> Buscar dados de um usuário")
     print("3 >>> Atualizar dados de um usuário")
     print("4 >>> Exibir todos os usuários")
-    print("5 >>> Sair do programa")
+    print("5 >>> Deletar usuario")
+    print("6 >>> Sair do programa")
     return input("Escolha uma opção: ")
 
 # Loop principal do programa
@@ -326,6 +304,8 @@ while True:
     elif opcao == "4":
         exibir_todos_usuarios()
     elif opcao == "5":
+        deletar_usuario()
+    elif opcao == "6":
         print("Encerrando o programa.")
         break
     else:
