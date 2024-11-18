@@ -245,7 +245,7 @@ def atualizar_usuario():
                 print("Idade atualizada com sucesso!")
                 time.sleep(3)
             elif opcao == "3":
-                pessoa["d_nascimento"] = coletar_data
+                pessoa["d_nascimento"] = coletar_data_nascimento()
                 print("Data de nascimento atualizada")
                 time.sleep(3)
             elif opcao == "4":
