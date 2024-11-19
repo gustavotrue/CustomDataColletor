@@ -7,7 +7,6 @@
 #----------------------------------------------------------------------------------#
 
 # Import's
-
 import time
 import os
 import json
@@ -273,11 +272,6 @@ def atualizar_usuario():
             return
     print("Usuário não encontrado.")
 
-# Função para exibir todos os usuários cadastrados
-def exibir_todos_usuarios():
-    login_adm()
-    exibir_todos_usuarios_arquivo()
-
 # Função do menu principal
 def menu():
     limpar_tela()  # Limpa a tela ao mostrar o menu
@@ -302,8 +296,10 @@ while True:
     elif opcao == "3":
         atualizar_usuario()
     elif opcao == "4":
-        exibir_todos_usuarios()
+        login_adm()
+        exibir_todos_usuarios_arquivo()
     elif opcao == "5":
+        login_adm()
         deletar_usuario()
     elif opcao == "6":
         print("Encerrando o programa.")
