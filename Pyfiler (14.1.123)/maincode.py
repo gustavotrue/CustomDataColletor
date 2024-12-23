@@ -29,6 +29,41 @@ from coleta_dados import (
     validar_cpf
 )
 
+black="\033[0;30m"
+red="\033[0;31m"
+bred="\033[1;31m"
+green="\033[0;32m"
+bgreen="\033[1;32m"
+yellow="\033[0;33m"
+byellow="\033[1;33m"
+blue="\033[0;34m"
+bblue="\033[1;34m"
+purple="\033[0;35m"
+bpurple="\033[1;35m"
+cyan="\033[0;36m"
+bcyan="\033[1;36m"
+white="\033[0;37m"
+nc="\033[00m"
+
+logo = f"""
+,-.----.
+\    /  \                   ,---,.             ,--,
+|   :    \                ,'  .' |   ,--,    ,--.'|
+|   |  .\ :             ,---.'   | ,--.'|    |  | :                 __  ,-.
+.   :  |: |             |   |   .' |  |,     :  : '               ,' ,'/ /|
+|   |   \ :       .--,  :   :  :   `--'_     |  ' |       ,---.   '  | |' |
+|   : .   /     /_ ./|  :   |  |-, ,' ,'|    '  | |      /     \  |  |   ,'
+;   | |`-'   , ' , ' :  |   :  ;/| '  | |    |  | :     /    /  | '  :  /
+|   | ;     /___/ \: |  |   |   .' |  | :    '  : |__  .    ' / | |  | '
+:   ' |      .  \  ' |  '   :  '   '  : |__  |  | '.'| '   ;   /| ;  : |
+:   : :       \  ;   :  |   |  |   |  | '.'| ;  :    ; '   |  / | |  , ;
+|   | :        \  \  ;  |   :  \   ;  :    ; |  ,   /  |   :    |  ---'
+`---'.|         :  \  \ |   | ,'   |  ,   /   ---`-'    \   \  /
+  `---`          \  ' ; `----'      ---`-'               `----'
+                  `--`
+[By \x67\x75\x67\x61\x68]
+"""
+
 ARQUIVO_USUARIOS = "usuarios.json"
 
 # Limpa a tela no Windows (comando 'cls') e no Linux/macOS (comando 'clear')
@@ -275,6 +310,7 @@ def atualizar_usuario():
 # Função do menu principal
 def menu():
     limpar_tela()  # Limpa a tela ao mostrar o menu
+    print(logo)
     print("Menu de opções:")
     print("1 >>> Novo Usuário")
     print("2 >>> Buscar dados de um usuário")
