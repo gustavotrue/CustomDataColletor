@@ -1,1 +1,16 @@
-[]
+[
+    {
+        "nome": "gug",
+        "idade": 15,
+        "d_nascimento": "12/12/1222",
+        "cpf": "073.006.271-61",
+        "endereco": "."
+    },
+    {
+        "nome": "gustab",
+        "idade": 1,
+        "d_nascimento": "24/10/2005",
+        "cpf": "073.006.271-61",
+        "endereco": "6"
+    }
+]

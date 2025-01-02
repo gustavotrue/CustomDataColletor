@@ -46,22 +46,22 @@ white="\033[0;37m"
 nc="\033[00m"
 
 logo = f"""
-,-.----.
+{blue},-.----.
 \    /  \                   ,---,.             ,--,
-|   :    \                ,'  .' |   ,--,    ,--.'|
+{cyan}|   :    \                ,'  .' |   ,--,    ,--.'|
 |   |  .\ :             ,---.'   | ,--.'|    |  | :                 __  ,-.
-.   :  |: |             |   |   .' |  |,     :  : '               ,' ,'/ /|
+{yellow}.   :  |: |             |   |   .' |  |,     :  : '               ,' ,'/ /|
 |   |   \ :       .--,  :   :  :   `--'_     |  ' |       ,---.   '  | |' |
-|   : .   /     /_ ./|  :   |  |-, ,' ,'|    '  | |      /     \  |  |   ,'
+{green}|   : .   /     /_ ./|  :   |  |-, ,' ,'|    '  | |      /     \  |  |   ,'
 ;   | |`-'   , ' , ' :  |   :  ;/| '  | |    |  | :     /    /  | '  :  /
-|   | ;     /___/ \: |  |   |   .' |  | :    '  : |__  .    ' / | |  | '
+{green}|   | ;     /___/ \: |  |   |   .' |  | :    '  : |__  .    ' / | |  | '
 :   ' |      .  \  ' |  '   :  '   '  : |__  |  | '.'| '   ;   /| ;  : |
-:   : :       \  ;   :  |   |  |   |  | '.'| ;  :    ; '   |  / | |  , ;
+{red}:   : :       \  ;   :  |   |  |   |  | '.'| ;  :    ; '   |  / | |  , ;
 |   | :        \  \  ;  |   :  \   ;  :    ; |  ,   /  |   :    |  ---'
-`---'.|         :  \  \ |   | ,'   |  ,   /   ---`-'    \   \  /
+{purple}`---'.|         :  \  \ |   | ,'   |  ,   /   ---`-'    \   \  /
   `---`          \  ' ; `----'      ---`-'               `----'
                   `--`
-[By \x67\x75\x67\x61\x68]
+{green}                                                                    [By \x67\x75\x67\x61\x68]
 """
 
 ARQUIVO_USUARIOS = "usuarios.json"
@@ -78,10 +78,18 @@ def novo_usuario():
     
     while True:
         cpf = coletar_cpf()
+        with open(ARQUIVO_USUARIOS, "r") as arquivo:
+            lista_pessoas = json.load(arquivo)
+
+            for dados in lista_pessoas:
+                if dados['cpf'] == cpf:
+                    print("Erro! O CPF inserido já está cadastrado. Tente novamente ou confira os números.")
+                    continue
         if validar_cpf(cpf):  # Verifica se o CPF é válido
             break  # Sai do loop se o CPF for válido
         else:
             print("CPF inválido! Tente novamente.")  # Aviso para CPF inválido
+        
     
     endereco = coletar_endereco()
     nova_pessoa = Pessoa(nome, idade, data, cpf, endereco)
