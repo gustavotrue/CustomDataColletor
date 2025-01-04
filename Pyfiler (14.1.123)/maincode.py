@@ -29,6 +29,8 @@ from coleta_dados import (
     validar_cpf
 )
 
+ARQUIVO_USUARIOS = "usuarios.json"
+
 black="\033[0;30m"
 red="\033[0;31m"
 bred="\033[1;31m"
@@ -64,8 +66,6 @@ logo = f"""
 {green}                                                                    [By \x67\x75\x67\x61\x68]
 """
 
-ARQUIVO_USUARIOS = "usuarios.json"
-
 # Limpa a tela no Windows (comando 'cls') e no Linux/macOS (comando 'clear')
 def limpar_tela():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -75,7 +75,7 @@ def novo_usuario():
     nome = coletar_nome()
     idade = coletar_idade()
     data = coletar_data_nascimento()
-    
+
     while True:
         cpf = coletar_cpf()
         with open(ARQUIVO_USUARIOS, "r") as arquivo:

@@ -2,7 +2,6 @@
 
 import time
 import os
-import keyboard
 import json
 from pessoa_class import( Pessoa )
 from dados import pessoas
@@ -16,11 +15,6 @@ ARQUIVO_USUARIOS = "usuarios.json"
 def login_adm():
     print("Insira as credenciais de administrador ou pressione ESC para voltar ao menu principal.")
     while True:
-
-        if keyboard.is_pressed("esc"):
-            print("Saindo para o menu principal...")
-            time.sleep(1)
-            break
 
         login_usuario = input("Usuário: ")
         login_senha = input("Senha: ")
